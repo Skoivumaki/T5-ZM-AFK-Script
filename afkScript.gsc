@@ -6,7 +6,34 @@
 init()
 {
 	level.debugMode = true;
+	level.afkTimeLimit = true;
     level thread onPlayerConnect();
+	
+	level.afkTeleportPos = spawnStruct();
+	level.afkReturnPos = spawnStruct();
+	
+	switch (level.script)
+	{
+		case "zombie_theater":
+			iPrintLnBold("Level Kino");
+			level.afkTeleportPos.origin = ( -431, 22, 258 );
+			level.afkTeleportPos.angles = ( 0, 58, 0 );
+			level.afkReturnPos.origin = ( 0, -1270, 95 );
+			level.afkReturnPos.angles = ( 0, 90, 0);
+			break;
+		case "zombie_pentagon":
+			iPrintLn("Level Five");
+			level.afkTeleportPos.origin = ( -886, 2240, -374 );
+			level.afkTeleportPos.angles = ( 0, -84, 0 );
+			level.afkReturnPos.origin = ( -900, 2513, 16 );
+			level.afkReturnPos.angles = ( 0, 1, 0);
+			break;
+		default:
+			iPrintLn("Level Unknown, AFK script may not work!");
+			level.afkTeleportPos.origin = ( -221, 22, 258 );
+			level.afkTeleportPos.angles = ( 0, 58, 0 );
+			break;
+	}
 }
 
 onPlayerConnect()
@@ -25,7 +52,7 @@ onPlayerSpawned()
     for(;;)
     {
         self waittill("spawned_player");
-		self iPrintLn("AFK plugin initialized");
+		self iPrintLn("AFK script initialized");
         self thread menuOpenListener();
 		self thread debugMenuListener();
     }
@@ -82,7 +109,7 @@ toggleAFKMode()
         return;
     }
 
-    self.lastAFKToggleTime = currentTime; // Update last toggle time only on enable
+    self.lastAFKToggleTime = currentTime;
 
     if (!isDefined(self.isAFK) || !self.isAFK)
     {
@@ -112,25 +139,15 @@ afkModeOn()
         self doGod();
     }
 
-    // Optionally, you can freeze the player in place
     self freezeControls(true);
 	
-	test = spawnStruct();
+	teleportPlayer(self, level.afkTeleportPos);
 	
-	test.origin = ( -431, 22, 258 );
-	test.angles = ( 0, 58, 0 );
-	
-	ship = GetEnt( "model_zombie_rocket", "targetname" );
-	teleportPlayer(self, test);
-	
-	//playerName = self.name;
-	
-	//level iPrintln("AFK: ^2+playerName");
-    // Add a visual indicator in the middle of the screen
+    // Show information panel for user (just random stuff, use if you wish)
 	self.afkText = newClientHudElem(self);
 	self.afkText.alignX = "center";
 	self.afkText.alignY = "center";
-	self.afkText.x = 80;  // Moved right
+	self.afkText.x = 80;
 	self.afkText.y = 20;
 	self.afkText.fontScale = 2.0;
 	self.afkText.alpha = 0.8;
@@ -139,7 +156,7 @@ afkModeOn()
 	self.afkText2 = newClientHudElem(self);
 	self.afkText2.alignX = "center";
 	self.afkText2.alignY = "center";
-	self.afkText2.x = 80;  // Moved right
+	self.afkText2.x = 80;
 	self.afkText2.y = 50;
 	self.afkText2.fontScale = 1.2;
 	self.afkText2.alpha = 0.8;
@@ -148,7 +165,7 @@ afkModeOn()
 	self.afkText3 = newClientHudElem(self);
 	self.afkText3.alignX = "center";
 	self.afkText3.alignY = "center";
-	self.afkText3.x = 80;  // Moved right
+	self.afkText3.x = 80;
 	self.afkText3.y = 80;
 	self.afkText3.fontScale = 1.2;
 	self.afkText3.alpha = 0.8;
@@ -157,7 +174,7 @@ afkModeOn()
 	self.afkText4 = newClientHudElem(self);
 	self.afkText4.alignX = "center";
 	self.afkText4.alignY = "center";
-	self.afkText4.x = 80;  // Moved right
+	self.afkText4.x = 80;
 	self.afkText4.y = 110;
 	self.afkText4.fontScale = 1.2;
 	self.afkText4.alpha = 0.8;
@@ -165,6 +182,11 @@ afkModeOn()
 
 
     // Wait for the player to turn off AFK mode
+	if(level.afkTimeLimit == true)
+	{
+		wait 10; //Time until forced AFK off
+		self notify("afk_mode_off");
+	}
     self waittill("afk_mode_off");
 }
 
@@ -172,11 +194,7 @@ afkModeOff()
 {
     self notify("afk_mode_off");
 	
-	trigger_name = "trigger_teleport_pad_0";
-	core = getent( trigger_name, "targetname" );
-	pad = getent( core.target, "targetname" );
-	
-	teleportPlayer(self, pad);
+	teleportPlayer(self, level.afkReturnPos);
 
     // Remove the visual indicator
     if (isDefined(self.afkText))
@@ -274,6 +292,7 @@ doGetposition()
 	
 		self iPrintln("AFK: ^2"+playerName);
 		self iPrintln("Angle: "+self.angles+"\nPosition: "+self.origin);
+		self iPrintLn("Map: "+level.script);
 		wait 5;
 		graceText destroy();
 		break;

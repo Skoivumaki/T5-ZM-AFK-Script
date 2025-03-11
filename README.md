@@ -12,7 +12,8 @@ Install by moving `afkScript.gsc` to `%localappdata%\Plutonium\storage\t5\script
 - **Auto-disables after 2 minutes** (configurable).  
 - Teleports player to a **safe AFK position** with a nice view 😎
 - **God mode enabled** and controls frozen to prevent shooting.  
-- Optional on-screen **HUD information** while AFK.  
+- Optional on-screen **HUD information** while AFK.
+- Notify all players when someone enters/leaves AFK.
 
 ### AFK Return & Grace Period  
 - **Teleports player back** to map spawn.  

@@ -7,6 +7,7 @@ init()
 {
 	level.debugMode = true;
 	level.afkTimeLimit = true;
+	level.afkTimeLimitSeconds = 20;
     level thread onPlayerConnect();
 	
 	level.afkTeleportPos = spawnStruct();
@@ -123,8 +124,6 @@ toggleAFKMode()
         //self iPrintLnBold("AFK Mode: OFF");
         self thread afkModeOff();
     }
-    
-    self closeMenu();
 }
 
 
@@ -179,13 +178,31 @@ afkModeOn()
 	self.afkText4.fontScale = 1.2;
 	self.afkText4.alpha = 0.8;
 	self.afkText4 setText("^5Oluthuone ^7| ^5No Perk Limit ^7| ^5PhD & Stam");
-
-
-    // Wait for the player to turn off AFK mode
+	
 	if(level.afkTimeLimit == true)
 	{
-		wait 10; //Time until forced AFK off
-		self notify("afk_mode_off");
+		timeText = level.afkTimeLimitSeconds;
+		timeWarnText = level.afkTimeLimitSeconds - 10;
+		self.afkTimeLimitText = newClientHudElem(self);
+		self.afkTimeLimitText.alignX = "center";
+		self.afkTimeLimitText.alignY = "center";
+		self.afkTimeLimitText.x = 80;
+		self.afkTimeLimitText.y = 150;
+		self.afkTimeLimitText.fontScale = 1.6;
+		self.afkTimeLimitText.alpha = 0.8;
+		self.afkTimeLimitText setText("^7AFK Time Limit: You can AFK for ^1"+timeText+" ^7Seconds!");
+		wait timeWarnText;
+		self.afkTimeLimitText setText("^7AFK Time Limit: Forced to leave AFK in ^110^7Seconds!");
+	}
+
+
+    // Wait for the player to turn off AFK mode or force if afkTimeLimit enabled
+	if(level.afkTimeLimit == true)
+	{
+		wait level.afkTimeLimitSeconds; //Time until forced AFK off
+		
+		self.isAFK = false;
+        self thread afkModeOff();
 	}
     self waittill("afk_mode_off");
 }
@@ -203,6 +220,7 @@ afkModeOff()
 		self.afkText2 destroy();
 		self.afkText3 destroy();
 		self.afkText4 destroy();
+		self.afkTimeLimitText destroy();
         self.afkText = undefined;
     }
 

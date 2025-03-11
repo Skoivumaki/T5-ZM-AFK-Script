@@ -7,7 +7,7 @@ init()
 {
 	level.debugMode = true;
 	level.afkTimeLimit = true;
-	level.afkTimeLimitSeconds = 20;
+	level.afkTimeLimitSeconds = 120;
     level thread onPlayerConnect();
 	
 	level.afkTeleportPos = spawnStruct();
@@ -16,21 +16,18 @@ init()
 	switch (level.script)
 	{
 		case "zombie_theater":
-			iPrintLnBold("Level Kino");
 			level.afkTeleportPos.origin = ( -431, 22, 258 );
 			level.afkTeleportPos.angles = ( 0, 58, 0 );
 			level.afkReturnPos.origin = ( 0, -1270, 95 );
 			level.afkReturnPos.angles = ( 0, 90, 0);
 			break;
 		case "zombie_pentagon":
-			iPrintLn("Level Five");
 			level.afkTeleportPos.origin = ( -886, 2240, -374 );
 			level.afkTeleportPos.angles = ( 0, -84, 0 );
 			level.afkReturnPos.origin = ( -900, 2513, 16 );
 			level.afkReturnPos.angles = ( 0, 1, 0);
 			break;
-		default:
-			iPrintLn("Level Unknown, AFK script may not work!");
+		default: //fallback if level unknown.
 			level.afkTeleportPos.origin = ( -221, 22, 258 );
 			level.afkTeleportPos.angles = ( 0, 58, 0 );
 			break;

@@ -5,7 +5,7 @@
 
 init()
 {
-	level.debugMode = true;
+	level.debugMode = false;
 	level.afkTimeLimit = true;
 	level.afkTimeLimitSeconds = 120;
     level thread onPlayerConnect();

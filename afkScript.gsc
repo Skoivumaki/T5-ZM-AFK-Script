@@ -8,6 +8,7 @@ init()
 	level.debugMode = false;
 	level.afkTimeLimit = true;
 	level.afkTimeLimitSeconds = 120;
+	level.afkTimeCooldownSeconds = 60;
     level thread onPlayerConnect();
 	
 	level.afkTeleportPos = spawnStruct();
@@ -85,6 +86,9 @@ debugMenuListener()
 			{
 				self thread doGetposition();
 				self thread givePoints();
+				self.nearby_zombies = 0;
+				self.nearby_zombies = self count_zombies_in_radius( 512 );
+				iPrintLnBold( "Zombies nearby: " + self.nearby_zombies );
 			}
 			wait 0.05;
 		}
@@ -93,17 +97,25 @@ debugMenuListener()
 
 toggleAFKMode()
 {
+    currentTime = int(getTime() / 1000);
+
     if (!isDefined(self.lastAFKToggleTime))
-    {
         self.lastAFKToggleTime = 0;
+
+    // Deny AFK if player on cooldown
+    if ((!isDefined(self.isAFK) || !self.isAFK) &&
+        currentTime - self.lastAFKToggleTime < level.afkTimeCooldownSeconds &&
+        self.lastAFKToggleTime != 0)
+    {
+        remaining = level.afkTimeCooldownSeconds - (currentTime - self.lastAFKToggleTime);
+        self iPrintLnBold("^1AFK Mode can only be enabled once every " + level.afkTimeCooldownSeconds + " seconds! (" + remaining + "s left)");
+        return;
     }
 
-    currentTime = int(getTime() / 1000); // Convert to seconds
-
-    // Restrict enabling AFK mode if less than 60 seconds have passed
-    if ((!isDefined(self.isAFK) || !self.isAFK) && (currentTime - self.lastAFKToggleTime < 60))
+	// Deny AFK if zombies near player
+    if (self count_zombies_in_radius(512) > 0)
     {
-        self iPrintLnBold("^1AFK Mode can only be enabled once per minute!");
+        self iPrintLnBold("^1Can't go AFK while zombies are nearby!");
         return;
     }
 
@@ -112,13 +124,11 @@ toggleAFKMode()
     if (!isDefined(self.isAFK) || !self.isAFK)
     {
         self.isAFK = true;
-        //self iPrintLnBold("AFK Mode: ON");
         self thread afkModeOn();
     }
     else
     {
         self.isAFK = false;
-        //self iPrintLnBold("AFK Mode: OFF");
         self thread afkModeOff();
     }
 }
@@ -235,7 +245,6 @@ afkGracePeriod()
     // Create a centered HUD element for the grace period message
     graceText = newClientHudElem(self);
     graceText.alignX = "left";
-    graceText.alignY = "left";
     graceText.x = 20;
     graceText.y = 20;
     graceText.fontScale = 1.2;
@@ -297,7 +306,6 @@ doGetposition()
 	
 		graceText = newHudElem(self);
 		graceText.alignX = "left";
-		graceText.alignY = "left";
 		graceText.x = 20;
 		graceText.y = 20;
 		//graceText.foreground = 1;
@@ -362,4 +370,21 @@ notifyAFK()
 
 	wait 5;
 	notifyText Destroy();
+}
+
+count_zombies_in_radius( radius )
+{
+    zombies = getentarray( "zombie", "targetname" );
+    count = 0;
+
+    for ( i = 0; i < zombies.size; i++ )
+    {
+        if ( !isdefined( zombies[i] ) )
+            continue;
+
+        if ( distance( self.origin, zombies[i].origin ) <= radius )
+            count++;
+    }
+
+    return count;
 }

@@ -7,7 +7,8 @@ Install by moving `afkScript.gsc` to `%localappdata%\Plutonium\storage\t5\script
 ## Features:
 
 ### AFK Mode
-- Toggle AFK mode with **[Aim Down Sights] + [Melee]**.  
+- Toggle AFK mode with **[Aim Down Sights] + [Melee]**.
+- **Anti-Abuse** deny entering AFK if zombies are nearby. (5~ meters around player)
 - **60-second cooldown** between activations (configurable). 
 - **Auto-disables after 2 minutes** (configurable).  
 - Teleports player to a **safe AFK position** with a nice view 😎
@@ -28,7 +29,6 @@ Install by moving `afkScript.gsc` to `%localappdata%\Plutonium\storage\t5\script
  
 ## 📌 Todo
  - Check if the player is alive or downed before enabling AFK mode.
- - Implement "anti cheese" to deny afk entry if zombies within set radius.
  - Refactor position variables, origin and angles can be set in one line?
  - Assign unique AFK teleport positions for all four players to avoid clipping when multiple players are frozen.
  - Implement a failsafe AFK return position system based on the player's location before AFK.  
@@ -55,3 +55,4 @@ Install by moving `afkScript.gsc` to `%localappdata%\Plutonium\storage\t5\script
 ## Preview, Kino Der Toten:
 
 ![image](https://github.com/user-attachments/assets/b38ac4d9-8176-4a72-8a34-bc9bd3d583e5)
+
